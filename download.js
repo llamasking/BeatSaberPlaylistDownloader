@@ -4,6 +4,9 @@ const http = require('https');
 const config = require('./config.json');
 const playlist = fs.readFileSync(config.downloadFile).toString().split('\n');
 
+// Generate the downloads folder if it doesn't exist. We only need to do this once, so it goes here.
+if (!fs.existsSync('./downloads')) fs.mkdirSync('./downloads');
+
 // Lets go generate a playlist file while we're at it!
 const bspl = {
     playlistTitle: config.playlistName,
