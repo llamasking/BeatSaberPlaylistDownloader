@@ -119,7 +119,7 @@ function main(songName) {
 
             // Download the song
             console.log(`Downloading map with most downloads for "${songName}"`);
-            downloadSong(song, songName).then();
+            downloadSong(song, songName);
         }
 
         // Get the song with the most upvotes in the search results.
@@ -131,7 +131,7 @@ function main(songName) {
 
             // Download the song
             console.log(`Downloading map with most upvotes for "${songName}"`);
-            downloadSong(song, songName).then();
+            downloadSong(song, songName);
         }
     });
 }
