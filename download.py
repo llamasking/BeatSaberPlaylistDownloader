@@ -115,7 +115,7 @@ if strtobool(config['General']['Auto Unzip']):
     for zip in downloadPath.iterdir():
         # Otherwise, it'll try to unzip the Beat Saber playlist.
         if '.zip' in str(zip):
-            print('Unzipping ' + str(zip) + '...')
+            print('Unzipping ' + str(zip))
             extractPath = Path(str(zip).replace('.zip', '/'))
             zipfile.ZipFile(zip, 'r').extractall(path=extractPath)
             zip.unlink()

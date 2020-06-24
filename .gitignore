@@ -62,3 +62,6 @@ typings/
 
 # Visual Studio Code
 .vscode/
+
+# Test files
+test*
