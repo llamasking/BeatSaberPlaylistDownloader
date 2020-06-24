@@ -2,6 +2,7 @@
 import configparser
 import urllib.request, urllib.parse
 import json
+import zipfile
 from pathlib import Path
 
 # Parse config.ini.
@@ -9,10 +10,10 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 # Create download path if it doesn't exist.
-downloadPath = Path(config['Download']['Download Path'])
+downloadPath = Path(config['General']['Download Path'])
 if not downloadPath.is_dir(): Path.mkdir(downloadPath)
 
-# Setup Beat Saber Playlist.
+# Setup Beat Saber playlist.
 bspl = {
     "playlistTitle": config['Playlist']['Name'],
     "playlistAuthor": "BeatSaverPlaylistDownloader",
@@ -21,7 +22,7 @@ bspl = {
 }
 
 # Parse download list.
-downloadList = open(config['Download']['Playlist File']).read().strip().splitlines()
+downloadList = open(config['General']['Playlist File']).read().strip().splitlines()
 
 # Function to convert a string to a bool. I just wanna stay in base Python.
 def strtobool(input): return input.lower() in ['y', 'yes', 't', 'true', 'on', '1']
@@ -37,7 +38,7 @@ def checkDifficulty(mapDiffs):
 
 # Function to check if map is downloaded and if not, download it.
 def downloadMap(map, dlMode):
-    downloadPath = Path(config['Download']['Download Path'] + map['hash'] + '.zip')
+    downloadPath = Path(config['General']['Download Path'] + map['hash'] + '.zip')
     if downloadPath.is_file():
         print(dlMode + ' [Exists] Skipping Map: ' + map['name'])
     else:
@@ -54,7 +55,7 @@ def downloadMap(map, dlMode):
         # Add map to playlist file if enabled.
         if strtobool(config['Playlist']['Generate']):
             bspl['songs'].append({"hash": map['hash']})
-            Path(config['Download']['Download Path'] + config['Playlist']['Name'] + '.bplist').write_text(json.dumps(bspl))
+            Path(config['General']['Download Path'] + config['Playlist']['Name'] + '.bplist').write_text(json.dumps(bspl))
 
 # Loop through each song in the download list.
 for songName in downloadList:
@@ -97,3 +98,24 @@ for songName in downloadList:
             else:
                 print('[UV] [Diff] Skipping Map: ' + mapToDL['name'])
 
+        if strtobool(config['Mode']['Highest Rating']):
+            # Just set the map to download to the first so there's something to compare against.
+            mapToDL = searchResults[0]
+            for map in searchResults:
+                if map['stats']['rating'] > mapToDL['stats']['rating']: mapToDL = map
+
+            if checkDifficulty(mapToDL):
+                downloadMap(mapToDL, '[RT]')
+            else:
+                print('[RT] [Diff] Skipping Map: ' + mapToDL['name'])
+
+# Auto unzip.
+if strtobool(config['General']['Auto Unzip']):
+    print('\nUnzipping maps...')
+    for zip in downloadPath.iterdir():
+        # Otherwise, it'll try to unzip the Beat Saber playlist.
+        if '.zip' in str(zip):
+            print('Unzipping ' + str(zip) + '...')
+            extractPath = Path(str(zip).replace('.zip', '/'))
+            zipfile.ZipFile(zip, 'r').extractall(path=extractPath)
+            zip.unlink()
