@@ -16,3 +16,4 @@ Generic Song Name (Python Sucks Remix)
 2. Fill out config.ini. Each option is explained in there.
 
 3. Run download.py. Everything will be in the folder specified.
+  * If you don't have Python installed, standalone binaries are avaliable in the releases section. These can be run without installing Python.
