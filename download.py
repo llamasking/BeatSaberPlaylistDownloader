@@ -27,19 +27,40 @@ downloadList = open(config['General']['Playlist File']).read().strip().splitline
 # Function to convert a string to a bool. I just wanna stay in base Python.
 def strtobool(input): return input.lower() in ['y', 'yes', 't', 'true', 'on', '1']
 
-# Function to verify map has difficulties required.
-def checkDifficulty(mapDiffs):
-    mapDiffs = mapDiffs['metadata']['difficulties']
-    allDiffs = True
+# Function to verify map has difficulties and game modes required.
+def checkRequirements(map, dlMode):
+    # Check map has all difficulties required
+    mapDiffs = map['metadata']['difficulties']
     for diff in mapDiffs:
         if strtobool(config['Difficulties'][diff]):
-            if strtobool(config['Difficulties'][diff]) != mapDiffs[diff]: allDiffs = False
-    return allDiffs
+            if strtobool(config['Difficulties'][diff]) != mapDiffs[diff]:
+                print(dlMode + ' [Diff] Skipping Map: ' + map['name'])
+                return False
+
+    # Check if map has all modes required. WHY DOES THIS HAVE TO BE SO COMPLICATED?
+    modesReq = 0
+    modesHas = 0
+    for cfgMode in config['Game Modes']:  # Loop through each mode in the config.
+        if strtobool(config['Game Modes'][cfgMode]):  # If the mode in the config is marked as required
+            modesReq += 1  # Add one to the count of required modes.
+
+    for mode in map['metadata']['characteristics']:  # Loop through each mode in the map.
+        if strtobool(config['Game Modes'][mode['name']]):  # If the mode is listed as required in the map
+            modesHas += 1  # Add one to the count of modes the map has.
+
+    if modesHas != modesReq:  # If the number of required modes the map has is not the same as the number of required modes, fuck.
+        print(dlMode + ' [Mode] Skipping Map: ' + map['name'])
+        return False
+
+    # Return True if all difficulties and game modes required are there.
+    return True
 
 # Function to check if map is downloaded and if not, download it.
 def downloadMap(map, dlMode):
     downloadPath = Path(config['General']['Download Path'] + map['key'] + ' - ' + map['name'] + '.zip')
-    if downloadPath.is_file():
+
+    # Check if map was already downloaded.
+    if downloadPath.is_file() or Path(config['General']['Download Path'] + map['key'] + ' - ' + map['name']).is_dir():
         print(dlMode + ' [Exists] Skipping Map: ' + map['name'])
     else:
         print(dlMode + ' Downloading Map: ' + map['name'])
@@ -69,45 +90,42 @@ for songName in downloadList:
     with urllib.request.urlopen(req) as url:
         searchResults = json.loads(url.read().decode())['docs']
 
-        # Download Modes
-        if strtobool(config['Mode']['First Result']):
-            if checkDifficulty(searchResults[0]):
+        if strtobool(config['Download Strategy']['First Result']):
+            if checkRequirements(searchResults[0], '[FR]'):
                 downloadMap(searchResults[0], '[FR]')
-            else:
-                print('[FR] [Diff] Skipping Map: ' + searchResults[0]['name'])
 
-        if strtobool(config['Mode']['Most Downloads']):
+        if strtobool(config['Download Strategy']['Most Downloads']):
             # Just set the map to download to the first so there's something to compare against.
             mapToDL = searchResults[0]
             for map in searchResults:
                 if map['stats']['downloads'] > mapToDL['stats']['downloads']: mapToDL = map
 
-            if checkDifficulty(mapToDL):
+            if checkRequirements(mapToDL, '[DL]'):
                 downloadMap(mapToDL, '[DL]')
-            else:
-                print('[DL] [Diff] Skipping Map: ' + mapToDL['name'])
 
-        if strtobool(config['Mode']['Most Upvotes']):
+        if strtobool(config['Download Strategy']['Most Upvotes']):
             # Just set the map to download to the first so there's something to compare against.
             mapToDL = searchResults[0]
             for map in searchResults:
                 if map['stats']['upVotes'] > mapToDL['stats']['upVotes']: mapToDL = map
 
-            if checkDifficulty(mapToDL):
+            if checkRequirements(mapToDL, '[UT]'):
                 downloadMap(mapToDL, '[UV]')
-            else:
-                print('[UV] [Diff] Skipping Map: ' + mapToDL['name'])
 
-        if strtobool(config['Mode']['Highest Rating']):
+        if strtobool(config['Download Strategy']['Highest Rating']):
             # Just set the map to download to the first so there's something to compare against.
             mapToDL = searchResults[0]
             for map in searchResults:
                 if map['stats']['rating'] > mapToDL['stats']['rating']: mapToDL = map
 
-            if checkDifficulty(mapToDL):
+            if checkRequirements(mapToDL, '[RT]'):
                 downloadMap(mapToDL, '[RT]')
-            else:
-                print('[RT] [Diff] Skipping Map: ' + mapToDL['name'])
+
+        if strtobool(config['Download Strategy']['All']):
+            # Just download all the maps!
+            for map in searchResults:
+                if checkRequirements(mapToDL, '[All]'):
+                    downloadMap(mapToDL, '[All]')
 
 # Auto unzip.
 if strtobool(config['General']['Auto Unzip']):
