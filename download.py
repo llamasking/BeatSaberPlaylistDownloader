@@ -38,7 +38,7 @@ def checkDifficulty(mapDiffs):
 
 # Function to check if map is downloaded and if not, download it.
 def downloadMap(map, dlMode):
-    downloadPath = Path(config['General']['Download Path'] + map['hash'] + '.zip')
+    downloadPath = Path(config['General']['Download Path'] + map['key'] + ' - ' + map['name'] + '.zip')
     if downloadPath.is_file():
         print(dlMode + ' [Exists] Skipping Map: ' + map['name'])
     else:
