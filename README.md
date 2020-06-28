@@ -17,4 +17,4 @@ Generic Song Name (Python Sucks Remix)
 
 3. Run download.py. Everything will be in the folder specified.
 
--   If you don't have Python installed, standalone binaries are avaliable in the releases section. These can be run without installing Python. Note these may not always be entirely up to date.
+-   There are standalone binaries avaliable in the releases section that can be run without installing Python. Note these may not always be entirely up to date.
