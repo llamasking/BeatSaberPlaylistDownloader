@@ -11,7 +11,7 @@ config.read('config.ini')
 
 # Create download path if it doesn't exist.
 downloadPath = Path(config['General']['Download Path'])
-if not downloadPath.is_dir(): Path.mkdir(downloadPath)
+downloadPath.mkdir(parents=True, exist_ok=True)
 
 # Setup Beat Saber playlist.
 bspl = {
@@ -40,17 +40,17 @@ def checkRequirements(map, dlMode):
     # Check if map has all modes required. WHY DOES THIS HAVE TO BE SO COMPLICATED?
     modesReq = 0
     modesHas = 0
-    for cfgMode in config['Game Modes']:  # Loop through each mode in the config.
-        if strtobool(config['Game Modes'][cfgMode]):  # If the mode in the config is marked as required
-            modesReq += 1  # Add one to the count of required modes.
+    for cfgMode in config['Game Modes']:                        # Loop through each mode in the config.
+        if strtobool(config['Game Modes'][cfgMode]):            # If the mode is marked as required,
+            modesReq += 1                                       # Add one to the count of required modes.
 
-    for mode in map['metadata']['characteristics']:  # Loop through each mode in the map.
-        if strtobool(config['Game Modes'][mode['name']]):  # If the mode is listed as required in the map
-            modesHas += 1  # Add one to the count of modes the map has.
+    for mode in map['metadata']['characteristics']:             # Loop through each mode in the map.
+        if strtobool(config['Game Modes'][mode['name']]):       # If the mode is listed as required in the config,
+            modesHas += 1                                       # Add one to the count of modes the map has.
 
-    if modesHas != modesReq:  # If the number of required modes the map has is not the same as the number of required modes, fuck.
-        print(dlMode + ' [Mode] Skipping Map: ' + map['name'])
-        return False
+    if modesHas != modesReq:                                    # If the map doesn't have the modes required,
+        print(dlMode + ' [Mode] Skipping Map: ' + map['name'])  # Say the map is being skipped,
+        return False                                            # Then return False so that it isn't downloaded.
 
     # Return True if all difficulties and game modes required are there.
     return True
