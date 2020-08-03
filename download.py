@@ -21,9 +21,6 @@ bspl = {
     "songs": []
 }
 
-# Parse download list.
-downloadList = open(config['General']['Playlist File']).read().strip().splitlines()
-
 # Function to convert a string to a bool. I just wanna stay in base Python.
 def strtobool(input): return input.lower() in ['y', 'yes', 't', 'true', 'on', '1']
 
@@ -79,7 +76,7 @@ def downloadMap(map, dlMode):
             Path(config['General']['Download Path'] + config['Playlist']['Name'] + '.bplist').write_text(json.dumps(bspl))
 
 # Loop through each song in the download list.
-for songName in downloadList:
+for songName in open(config['General']['Playlist File']).read().strip().splitlines():
     print('\nSearching for Song: ' + songName)
 
     # Add http header to get around whatever is spitting a forbidden page.

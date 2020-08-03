@@ -2,16 +2,15 @@
 
 A Python script that takes a list of songs and automatically searches for and downloads them off BeatSaver.
 
-## How do you use it?
+## Usage
 
 1. Give it a text file with the name of each song you want to download on it's own line. For example:
 
-```
-Generic Song Name
-Generic Author - Generic Song Name
-Generic Song Name (Python Sucks Remix)
-...
-```
+
+        Generic Song Name
+        Generic Author - Generic Song Name
+        Generic Song Name (Python Sucks Remix)
+        ...
 
 2. Fill out config.ini. Each option is explained in there.
 
